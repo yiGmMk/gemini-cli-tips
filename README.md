@@ -353,3 +353,125 @@ With \--yolo perhaps, so it won’t ask confirmation to write the file. This wou
 In summary, **Headless Mode** enables automation. It’s the bridge between Gemini CLI and other systems. Mastering it means you can scale up your AI usage – not just when you’re typing in the terminal, but even when you aren’t around, your AI agent can do work for you.
 
 *(Tip: For truly long-running non-interactive tasks, you might also look into Gemini CLI’s “Plan” mode or how it can generate multi-step plans without intervention. However, those are advanced topics beyond this scope. In most cases, a well-crafted single prompt via headless mode can achieve a lot.)*
+
+## Tip 12: Save and Resume Chat Sessions
+
+**Quick use-case:** If you’ve been debugging an issue with Gemini CLI for an hour and need to stop, you don’t have to lose the conversation context. Use /chat save \<name\> to save the session. Later (even after restarting the CLI), you can use /chat resume \<name\> to pick up where you left [off](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=,help%20information%20and%20available%20commands). This way, long-running conversations can be paused and continued seamlessly.
+
+Gemini CLI essentially has a built-in chat session manager. The commands to know are:
+
+* \*/chat save \<tag\>\* – Saves the current conversation state under a tag/name you [provide](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=,help%20information%20and%20available%20commands). The tag is like a filename or key for that session. Save often if you want, it will overwrite the tag if it exists. (Using a descriptive name is helpful – e.g., chat save fix-docker-issue.)
+
+* \*/chat list\* – Lists all your saved sessions (the tags you’ve [used)](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=,help%20information%20and%20available%20commands). This helps you remember what you named previous saves.
+
+* \*/chat resume \<tag\>\* – Resumes the session with that tag, restoring the entire conversation context and history to how it was when [saved](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=,help%20information%20and%20available%20commands). It’s like you never left. You can then continue chatting from that point.
+
+* \*/chat share\* \- (saves to file) This is useful as you can share the entire chat with someone else who can continue the session. Almost collaboration-like.
+
+Under the hood, these sessions are stored likely in \~/.gemini/chats/ or a similar location. They include the conversation messages and any relevant state. This feature is super useful for cases such as:
+
+* **Long debugging sessions:** Sometimes debugging with an AI can be a long back-and-forth. If you can’t solve it in one go, save it and come back later (maybe with a fresh mind). The AI will still “remember” everything from before, because the whole context is reloaded.
+
+* **Multi-day tasks:** If you’re using Gemini CLI as an assistant for a project, you might have one chat session for “Refactor module X” that spans multiple days. You can resume that specific chat each day so the context doesn’t reset daily. Meanwhile, you might have another session for “Write documentation” saved separately. Switching contexts is just a matter of saving one and resuming the other.
+
+* **Team hand-off:** This is more experimental, but in theory, you could share the content of a saved chat with a colleague (the saved files are likely portable). If they put it in their .gemini directory and resume, they could see the same context. The **practical simpler approach** for collaboration is just copying the relevant Q\&A from the log and using a shared GEMINI.md or prompt, but it’s interesting to note that the session data is yours to keep.
+
+**Usage example:**
+
+\> /chat save api-upgrade
+
+*(Session saved as “api-upgrade”)*
+
+\> /quit
+
+*(Later, reopen CLI)*
+
+$ gemini  
+gemini\> /chat list
+
+*(Shows: api-upgrade)*
+
+gemini\> /chat resume api-upgrade
+
+Now the model greets you with the last exchange’s state ready. You can confirm by scrolling up that all your previous messages are present.
+
+**Pro Tip:** Use meaningful tags when saving [chats](https://medium.com/@ferreradaniel/gemini-cli-free-ai-tool-upgrade-5-new-features-you-need-right-now-04cfefac5e93#:~:text=Naming%20conventions%20to%20keep%20projects,organized). Instead of /chat save session1, give it a name related to the topic (e.g. /chat save memory-leak-bug). This will help you find the right one later via /chat list. There is no strict limit announced on how many sessions you can save, but cleaning up old ones occasionally might be wise just for organization.
+
+This feature turns Gemini CLI into a persistent advisor. You don’t lose knowledge gained in a conversation; you can always pause and resume. It’s a differentiator compared to some other AI interfaces that forget context when closed. For power users, it means **you can maintain parallel threads of work** with the AI. Just like you’d have multiple terminal tabs for different tasks, you can have multiple chat sessions saved and resume the one you need at any given time.
+
+## Tip 13: Multi-Directory Workspace – One Gemini, Many Folders
+
+**Quick use-case:** Do you have a project split across multiple repositories or directories? You can launch Gemini CLI with access to *all of them* at once, so it sees a unified workspace. For example, if your frontend and backend are separate folders, you can include both so that Gemini can edit or reference files in both.
+
+There are two ways to use **multi-directory mode**:
+
+* **Launch flag:** Use the \--include-directories (or \-I) flag when starting Gemini CLI. For example:
+
+gemini \--include-directories "../backend:../frontend"
+
+This assumes you run the command from, say, a scripts directory and want to include two sibling folders. You provide a colon-separated list of paths. Gemini CLI will then treat all those directories as part of one big workspace.
+
+* **Persistent setting:** In your settings.json, you can define "includeDirectories": \["path1", "path2", [...\]](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=,61AFEF%22%2C%20%22AccentPurple). This is useful if you always want certain common directories loaded (e.g., a shared library folder that multiple projects use). The paths can be relative or absolute. Environment variables in the paths (like "\~/common-utils") are [allowed](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=,61AFEF%22%2C%20%22AccentPurple).
+
+When multi-dir mode is active, the CLI’s context and tools consider files across all included locations. The \> /directory show command will list which directories are in the current [workspace](https://medium.com/@ferreradaniel/gemini-cli-free-ai-tool-upgrade-5-new-features-you-need-right-now-04cfefac5e93#:~:text=How%20to%20add%20multiple%20directories,step). You can also dynamically add directories during a session with /directory add [\<path\>](https://medium.com/@ferreradaniel/gemini-cli-free-ai-tool-upgrade-5-new-features-you-need-right-now-04cfefac5e93#:~:text=How%20to%20add%20multiple%20directories,step) – it will then load that on the fly (potentially scanning it for context like it does on startup).
+
+**Why use multi-directory mode?** In microservice architectures or modular codebases, it’s common that one piece of code lives in one repo and another piece in a different repo. If you only ran Gemini in one, it wouldn’t “see” the others. By combining them, you enable cross-project reasoning. For example, you could ask, “Update the API client in the frontend to match the backend’s new API endpoints” – Gemini can open the backend folder to see the API definitions and simultaneously open the frontend code to modify it accordingly. Without multi-dir, you’d have to do one side at a time and manually carry info over.
+
+**Example:** Let’s say you have client/ and server/. You start:
+
+cd client  
+gemini \--include-directories "../server"
+
+Now at the gemini\> prompt, if you do \> \!ls, you’ll see it can list files in both client and server (it might show them as separate paths). You could do:
+
+\> Open server/routes/api.py and client/src/api.js side by side to compare function names.
+
+The AI will have access to both files. Or you might say:
+
+\> The API changed: the endpoint "/users/create" is now "/users/register". Update both backend and frontend accordingly.
+
+It can simultaneously create a patch in the backend route and adjust the frontend fetch call.
+
+Under the hood, Gemini merges the file index of those directories. There might be some performance considerations if each directory is huge, but generally it handles multiple small-medium projects fine. The cheat sheet notes that this effectively creates one workspace with multiple [roots](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=%22includeDirectories%22%3A%20%5B%22..%2Fshared,98C379%22%2C%20%22AccentYellow).
+
+**Tip within a tip:** Even if you don’t use multi-dir all the time, know that you can still reference files across the filesystem by absolute path in prompts (@/path/to/file). However, without multi-dir, Gemini might not have permission to edit those or know to load context from them proactively. Multi-dir formally includes them in scope so it’s aware of all files for tasks like search or code generation across the whole set.
+
+**Remove directories:** If needed, /directory remove \<path\> (or a similar command) can drop a directory from the workspace. This is less common, but maybe if you included something accidentally, you can remove it.
+
+In summary, **multi-directory mode unifies your context**. It’s a must-have for polyrepo projects or any situation where code is split up. It makes Gemini CLI act more like an IDE that has your entire solution open. As a pro user, this means no part of your project is out of the AI’s reach.
+
+## Tip 14: Organize and Clean Up Your Files with AI Assistance
+
+**Quick use-case:** Tired of a messy Downloads folder or disorganized project assets? You can enlist Gemini CLI to act as a smart organizer. By providing it an overview of a directory, it can classify files and even move them into subfolders (with your approval). For instance, “Clean up my Downloads: move images to an Images folder, PDFs to Documents, and delete temporary files.”
+
+Because Gemini CLI can read file names, sizes, and even peek into file contents, it can make informed decisions about file [organization](https://github.com/google-gemini/gemini-cli/discussions/7890#:~:text=We%20built%20a%20CLI%20tool,trash%20folder%20for%20manual%20deletion). One community-created tool dubbed **“Janitor AI”** showcases this: it runs via Gemini CLI to categorize files as important vs junk, and groups them [accordingly](https://github.com/google-gemini/gemini-cli/discussions/7890#:~:text=We%20built%20a%20CLI%20tool,trash%20folder%20for%20manual%20deletion). The process involved scanning the directory, using Gemini’s reasoning on filenames and metadata (and content if needed), then moving files into categories. Notably, it didn’t automatically delete junk – rather, it moved them to a Trash folder for [review](https://github.com/google-gemini/gemini-cli/discussions/7890#:~:text=organize%20files,trash%20folder%20for%20manual%20deletion).
+
+Here’s how you might replicate such a workflow with Gemini CLI manually:
+
+1. **Survey the directory:** Use a prompt to have Gemini list and categorize. For example:
+
+\> List all files in the current directory and categorize them as "images", "videos", "documents", "archives", or "others".
+
+Gemini might use \!ls or similar to get the file list, then analyze the names/extensions to produce categories.
+
+1. **Plan the organization:** Ask Gemini how it would like to reorganize. For example:
+
+\> Propose a new folder structure for these files. I want to separate by type (Images, Videos, Documents, etc.). Also identify any files that seem like duplicates or unnecessary.
+
+The AI might respond with a plan: e.g., *“Create folders: Images/, Videos/, Documents/, Archives/. Move X.png, Y.jpg to Images/; move A.mp4 to Videos/; etc. The file temp.txt looks unnecessary (maybe a temp file).”*
+
+1. **Execute moves with confirmation:** You can then instruct it to carry out the plan. It may use shell commands like mv for each file. Since this modifies your filesystem, you’ll get confirmation prompts for each (unless you YOLO it). Carefully approve the moves. After completion, your directory will be neatly organized as suggested.
+
+Throughout, Gemini’s natural language understanding is key. It can reason, for instance, that IMG\_001.png is an image or that presentation.pdf is a document, even if not explicitly stated. It can even open an image (using its vision capability) to see what’s in it – e.g., differentiating between a screenshot vs a photo vs an icon – and name or sort it [accordingly](https://dev.to/therealmrmumba/7-insane-gemini-cli-tips-that-will-make-you-a-superhuman-developer-2d7h#:~:text=If%20your%20project%20folder%20is,using%20relevant%20and%20descriptive%20terms).
+
+**Renaming files by content:** A particularly magical use is having Gemini rename files to be more descriptive. The Dev Community article “7 Insane Gemini CLI Tips” describes how Gemini can **scan images and automatically rename them** based on their [content](https://dev.to/therealmrmumba/7-insane-gemini-cli-tips-that-will-make-you-a-superhuman-developer-2d7h#:~:text=If%20your%20project%20folder%20is,using%20relevant%20and%20descriptive%20terms). For example, a file named IMG\_1234.jpg might be renamed to login\_screen.jpg if the AI sees it’s a screenshot of a login [screen](https://dev.to/therealmrmumba/7-insane-gemini-cli-tips-that-will-make-you-a-superhuman-developer-2d7h#:~:text=If%20your%20project%20folder%20is,using%20relevant%20and%20descriptive%20terms). To do this, you could prompt:
+
+\> For each .png image here, look at its content and rename it to something descriptive.
+
+Gemini will open each image (via vision tool), get a description, then propose a mv IMG\_1234.png login\_screen.png [action](https://dev.to/therealmrmumba/7-insane-gemini-cli-tips-that-will-make-you-a-superhuman-developer-2d7h#:~:text=If%20your%20project%20folder%20is,using%20relevant%20and%20descriptive%20terms). This can dramatically improve the organization of assets, especially in design or photo folders.
+
+**Two-pass approach:** The Janitor AI discussion noted a two-step process: first broad categorization (important vs junk vs other), then refining [groups](https://github.com/google-gemini/gemini-cli/discussions/7890#:~:text=organize%20files,trash%20folder%20for%20manual%20deletion). You can emulate this: first separate files that likely can be deleted (maybe large installer .dmg files or duplicates) from those to keep. Then focus on organizing the keepers. Always double-check what the AI flags as junk; its guess might not always be right, so manual oversight is needed.
+
+**Safety tip:** When letting the AI loose on file moves or deletions, have backups or at least be ready to undo (with /restore or your own backup). It’s wise to do a dry-run: ask Gemini to print the commands it *would* run to organize, without executing them, so you can review. For instance: “List the mv and mkdir commands needed for this plan, but don’t execute them yet.” Once you review the list, you can either copy-paste execute them, or instruct Gemini to proceed.
+
+This is a prime example of using Gemini CLI for “non-obvious” tasks – it’s not just writing code, it’s doing **system housekeeping with AI smarts**. It can save time and bring a bit of order to chaos. After all, as developers we accumulate clutter (logs, old scripts, downloads), and an AI janitor can be quite handy.
