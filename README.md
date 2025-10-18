@@ -39,7 +39,7 @@ $ gemini
 gemini> Create a React recipe management app using SQLite
 ```
 
-You can then watch as Gemini CLI creates files, installs dependencies, runs tests, etc., to fulfill your request[\[9\]](https://genmind.ch/posts/Howto-Supercharge-Your-Terminal-with-Gemini-CLI/#:~:text=to%20enter%20the%20interactive%20REPL,language%20prompts%20like)[\[10\]](https://genmind.ch/posts/Howto-Supercharge-Your-Terminal-with-Gemini-CLI/#:~:text=and%20watch%20it%20create%20files%2C,and%20show%20you%20the%20results). If you prefer a one-shot invocation (non-interactive), use the \-p flag with a prompt, for example:
+You can then watch as Gemini CLI creates files, installs dependencies, runs tests, etc., to fulfill your request. If you prefer a one-shot invocation (non-interactive), use the \-p flag with a prompt, for example:
 
 ```bash
 gemini -p "Summarize the main points of the attached file. @./report.txt"
@@ -57,11 +57,13 @@ With the basics out of the way, let's explore a series of pro tips and hidden fe
 
 When working on a project, you often have certain overarching details - e.g. coding style guidelines, project architecture, or important facts - that you want the AI to keep in mind. Gemini CLI allows you to encode these in one or more **GEMINI.md** files. Simply create a .gemini folder (if not already present) in your project, and add a Markdown file named GEMINI.md with whatever notes or instructions you want the AI to persist. For example:
 
+```markdown
 \# Project Phoenix - AI Assistant
 
 \- All Python code must follow PEP 8 style.  
 \- Use 4 spaces for indentation.  
 \- The user is building a data pipeline; prefer functional programming paradigms.
+```
 
 Place this file in your project root (or in subdirectories for more granular context). Now, whenever you run gemini in that project, it will automatically load these instructions into [context](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=Context%20Files%20%28). This means the model will *always* be primed with them, avoiding the need to prepend the same guidance to every prompt.
 
@@ -85,6 +87,7 @@ Gemini CLI supports **custom slash commands** that you can define in simple conf
 
 Let's walk through an example. Say you want a command to generate a unit test from a requirement description. You could create \~/.gemini/commands/test/gen.toml with the following content:
 
+```markdown
 \# Invoked as: /test:gen "Description of the test"  
 description \= "Generates a unit test based on a requirement."  
 prompt \= """  
@@ -92,6 +95,7 @@ You are an expert test engineer. Based on the following requirement, please writ
 
 Requirement: {{args}}  
 """
+```
 
 Now, after reloading or restarting Gemini CLI, you can simply type:
 
@@ -229,9 +233,9 @@ For example:
 Summarize the requirements from this design doc: https://docs.google.com/document/d/\<id\>
 ```
 
-Gemini can pull in the content of that Doc and incorporate it into its response. Similarly, it can read Google Sheets or Drive files by link, and even perform internal searches on Google's knowledge base (Moma) if you have access.
+Gemini can pull in the content of that Doc and incorporate it into its response. Similarly, it can read Google Sheets or Drive files by link.
 
-**How this works:** These capabilities are typically enabled via **MCP integrations**. Google's Gemini CLI team has built (or is working on) connectors for Google Workspace. One approach is running a small MCP server that uses Google's APIs (Docs API, Sheets API, etc.) to retrieve document content when given a URL or \[ID[\[41\]](https://github.com/google-gemini/gemini-cli/issues/7175#:~:text=Create%20a%20Google%20Docs%20MCP,to%20provide%20seamless%20document%20access)\]([https://github.com/google-gemini/gemini-cli/issues/7175\#:\~:text=%2A%20%60read\_google\_doc%28doc\_id\_or\_url%29%60%20,List%20accessible%20documents](https://github.com/google-gemini/gemini-cli/issues/7175#:~:text=%2A%20%60read_google_doc%28doc_id_or_url%29%60%20,List%20accessible%20documents)). When configured, you might have slash commands or tools like /read\_google\_doc or simply an auto-detection that sees a Google Docs link and invokes the appropriate tool to fetch it.
+**How this works:** These capabilities are typically enabled via **MCP integrations**. Google's Gemini CLI team has built (or is working on) connectors for Google Workspace. One approach is running a small MCP server that uses Google's APIs (Docs API, Sheets API, etc.) to retrieve document content when given a URL or [ID](https://github.com/google-gemini/gemini-cli/issues/7175). When configured, you might have slash commands or tools like /read\_google\_doc or simply an auto-detection that sees a Google Docs link and invokes the appropriate tool to fetch it.
 
 For example, in an Agent Factory podcast demo, the team used a **Google Docs MCP** to save a summary directly to a [doc](https://cloud.google.com/blog/topics/developers-practitioners/agent-factory-recap-deep-dive-into-gemini-cli-with-taylor-mullen#:~:text=%2A%20Utilize%20the%20google,summary%20directly%20to%20Google%20Docs) - which implies they could also read the doc's content in the first place. In practice, you might do something like:
 
