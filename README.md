@@ -28,8 +28,8 @@ For example, add to your shell profile:
 
 **Basic Usage:** To start an interactive session, just run gemini with no arguments. You'll get a gemini\> prompt where you can type requests or commands. For instance:
 
-$ gemini  
-gemini\> Create a React recipe management app using SQLite
+> $ gemini  
+> gemini\> Create a React recipe management app using SQLite
 
 You can then watch as Gemini CLI creates files, installs dependencies, runs tests, etc., to fulfill your request[\[9\]](https://genmind.ch/posts/Howto-Supercharge-Your-Terminal-with-Gemini-CLI/#:~:text=to%20enter%20the%20interactive%20REPL,language%20prompts%20like)[\[10\]](https://genmind.ch/posts/Howto-Supercharge-Your-Terminal-with-Gemini-CLI/#:~:text=and%20watch%20it%20create%20files%2C,and%20show%20you%20the%20results). If you prefer a one-shot invocation (non-interactive), use the \-p flag with a prompt, for example:
 
@@ -107,6 +107,7 @@ gemini mcp add myserver \--command "python3 my\_mcp\_server.py" \--port 8080
 
 This would register a server named "myserver" that Gemini CLI will launch by running the given command (here a Python module) on port 8080\. In \~/.gemini/settings.json, it would add an entry under mcpServers. For example:
 
+```json
 "mcpServers": {  
   "myserver": {  
     "command": "python3",  
@@ -115,6 +116,7 @@ This would register a server named "myserver" that Gemini CLI will launch by run
     "timeout": 15000  
   }  
 }
+```
 
 This configuration (based on the official docs) tells Gemini how to start the MCP server and [where](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=Example%20). Once running, the tools provided by that server become available to Gemini CLI. You can list all MCP servers and their tools with the slash command:
 
@@ -166,7 +168,7 @@ Gemini CLI's **checkpointing** feature acts as a safety net. When enabled, the C
 
 **How to use it:** You can turn on checkpointing by launching the CLI with the \--checkpointing flag:
 
-gemini \--checkpointing
+> gemini \--checkpointing
 
 Alternatively, you can make it the default by adding to your config ("checkpointing": { "enabled": true } in [settings.json](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=%7B%20,true)). Once active, you'll notice that each time Gemini is about to write to a file, it says something like "Checkpoint saved."
 
@@ -307,7 +309,7 @@ In summary, **don't hesitate to fire up Gemini CLI as your assistant for environ
 
 To start in YOLO mode from the get-go, launch the CLI with:
 
-gemini \--yolo
+> gemini \--yolo
 
 Or the short form gemini \-y. You'll see some indication in the CLI (like a different prompt or a notice) that auto-approve is [on](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=initial%20prompt.%20%2A%20%60,to%20revert%20changes). During an interactive session, you can toggle it by pressing **Ctrl+Y** at any [time](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=,prompt%20in%20an%20external%20editor) - the CLI will usually display a message like "YOLO mode enabled (all actions auto-approved)" in the footer.
 
@@ -329,8 +331,8 @@ For instance, to get a one-off answer without opening the REPL, you've seen you 
 
 * **System prompt override:** If you want to run Gemini CLI with a custom system persona or instruction set (different from the default), you can use the environment variable GEMINI\_SYSTEM\_MD. By setting this, you tell Gemini CLI to ignore its built-in system prompt and use your provided file [instead](https://medium.com/google-cloud/practical-gemini-cli-bring-your-own-system-instruction-19ea7f07faa2#:~:text=The%20,rather%20than%20its%20hardcoded%20defaults). For example:
 
-export GEMINI\_SYSTEM\_MD="/path/to/custom\_system.md"  
-gemini \-p "Perform task X with high caution"
+> export GEMINI\_SYSTEM\_MD="/path/to/custom\_system.md"  
+> gemini \-p "Perform task X with high caution"
 
 This would load your custom\_system.md as the system prompt (the "role" and rules the AI follows) before executing the [prompt](https://medium.com/google-cloud/practical-gemini-cli-bring-your-own-system-instruction-19ea7f07faa2#:~:text=The%20feature%20is%20enabled%20by,specific%20configurations). Alternatively, if you set GEMINI\_SYSTEM\_MD=true, the CLI will look for a file named system.md in the current project's .gemini [directory](https://medium.com/google-cloud/practical-gemini-cli-bring-your-own-system-instruction-19ea7f07faa2#:~:text=The%20feature%20is%20enabled%20by,specific%20configurations). This feature is very advanced - it essentially allows you to *replace the built-in brain* of the CLI with your own instructions, which some users do for specialized workflows (like simulating a specific persona or enforcing ultra-strict policies). Use it carefully, as replacing the core prompt can affect tool usage (the core prompt contains important directions for how the AI selects and uses [tools](https://medium.com/google-cloud/practical-gemini-cli-bring-your-own-system-instruction-19ea7f07faa2#:~:text=If%20you%20read%20my%20previous,proper%20functioning%20of%20Gemini%20CLI)).
 
@@ -346,7 +348,7 @@ One more headless trick: **the \--format=json flag** (or config setting). Gemini
 
 **Example:** Let's say you want a daily summary of a news website. You could have a script:
 
-gemini \-p "Web-fetch \\"[https://news.site/top-stories\\\\](https://news.site/top-stories\\\\)" and extract the headlines, then write them to headlines.txt"
+> gemini \-p "Web-fetch \\"[https://news.site/top-stories\\\\](https://news.site/top-stories\\\\)" and extract the headlines, then write them to headlines.txt"
 
 With \--yolo perhaps, so it won't ask confirmation to write the file. This would use the web fetch tool to get the page and the file write tool to save the headlines. All automatically, no human in the loop. The possibilities are endless once you treat Gemini CLI as a scriptable component.
 
@@ -407,7 +409,7 @@ There are two ways to use **multi-directory mode**:
 
 * **Launch flag:** Use the \--include-directories (or \-I) flag when starting Gemini CLI. For example:
 
-gemini \--include-directories "../backend:../frontend"
+> gemini \--include-directories "../backend:../frontend"
 
 This assumes you run the command from, say, a scripts directory and want to include two sibling folders. You provide a colon-separated list of paths. Gemini CLI will then treat all those directories as part of one big workspace.
 
@@ -419,8 +421,8 @@ When multi-dir mode is active, the CLI's context and tools consider files across
 
 **Example:** Let's say you have client/ and server/. You start:
 
-cd client  
-gemini \--include-directories "../server"
+> cd client  
+> gemini \--include-directories "../server"
 
 Now at the gemini\> prompt, if you do \> \!ls, you'll see it can list files in both client and server (it might show them as separate paths). You could do:
 
@@ -609,9 +611,11 @@ Another approach is using environment or config to explicitly disable certain to
 
 This extreme example would stop *all* shell commands from running (making Gemini effectively read-only). More granular, there was mention of skipping confirmation for some; similarly you might configure something like:
 
-"tools": {  
-"exclude": \["apt-get", "shutdown"\]  
+```json
+"tools": {
+  "exclude": ["apt-get", "shutdown"]
 }
+```
 
 *(This syntax is illustrative; consult docs for exact usage.)*
 
@@ -683,6 +687,7 @@ Gemini CLI is highly configurable. In your home directory (\~/.gemini/) or proje
 
 Inside **settings.json**, options are specified as JSON key-value pairs. Here's a snippet illustrating some useful customizations:
 
+```json
 {  
 "theme": "GitHub",  
 "autoAccept": false,  
@@ -691,6 +696,7 @@ Inside **settings.json**, options are specified as JSON key-value pairs. Here's 
 "includeDirectories": \["../shared-library", "\~/common-utils"\],  
 "usageStatisticsEnabled": true  
 }
+```
 
 In this example, we set the theme to "GitHub" (a popular color scheme), disable autoAccept (so the CLI will always ask before running potentially altering tools), enable Vim keybindings for the input editor, and enforce using Docker for tool sandboxing. We also added some directories to the workspace context (includeDirectories) so Gemini can see code in shared paths by [default](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=%7B%20,utils). Finally, we kept usageStatisticsEnabled true to collect basic usage stats (which feeds into telemetry, if [enabled)](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=%2A%20%60autoAccept%60%3A%20Auto,to%20disable%20usage%20statistics). There are many more settings available - like defining custom color themes, adjusting token limits, or whitelisting/blacklisting specific tools - all documented in the configuration [guide](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=%2A%20%60autoAccept%60%3A%20Auto,to%20disable%20usage%20statistics). By tailoring these, you ensure Gemini CLI behaves optimally for *your* workflow (for instance, some developers always want vimMode on for efficiency, while others might prefer the default editor).
 
