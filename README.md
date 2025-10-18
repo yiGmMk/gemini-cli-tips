@@ -158,3 +158,38 @@ Another use is personal notes. Because \~/.gemini/GEMINI.md (global memory) is l
 
 In summary, **Memory Addition & Recall** helps Gemini CLI maintain state. Think of it as a knowledge base that grows with your project. Use it to avoid repeating yourself or to remind the AI of facts it would otherwise have to rediscover from scratch.
 
+## Tip 5: Use Checkpointing and **/restore** as an Undo Button
+
+**Quick use-case:** If Gemini CLI makes a series of changes to your files that you’re not happy with, you can *instantly roll back* to a prior state. Enable checkpointing when you start Gemini (or in settings), and use the /restore command to undo changes like a lightweight Git [revert](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=,Exit%20the%20Gemini%20CLI). /restore rolls back your workspace to the saved checkpoint; conversation state may be affected depending on how the checkpoint was captured.
+
+Gemini CLI’s **checkpointing** feature acts as a safety net. When enabled, the CLI takes a snapshot of your project’s files *before* each tool execution that modifies [files](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=When%20,snapshot%20before%20tools%20modify%20files). If something goes wrong, you can revert to the last known good state. It’s essentially version control for the AI’s actions, without you needing to manually commit to Git each time.
+
+**How to use it:** You can turn on checkpointing by launching the CLI with the \--checkpointing flag:
+
+gemini \--checkpointing
+
+Alternatively, you can make it the default by adding to your config ("checkpointing": { "enabled": true } in [settings.json](https://www.philschmid.de/gemini-cli-cheatsheet#:~:text=%7B%20,true)). Once active, you’ll notice that each time Gemini is about to write to a file, it says something like “Checkpoint saved.”
+
+If you then realize an AI-made edit is problematic, you have two options:
+
+* Run \*/restore list\* (or just /restore with no arguments) to see a list of recent checkpoints with timestamps and descriptions.
+
+* Run \*/restore \<id\>\* to rollback to a specific checkpoint. If you omit the id and there’s only one pending checkpoint, it will restore that by [default](https://medium.com/@ferreradaniel/gemini-cli-free-ai-tool-upgrade-5-new-features-you-need-right-now-04cfefac5e93#:~:text=Step).
+
+For example:
+
+\> /restore
+
+Gemini CLI might output:
+
+0: \[2025-09-22 10:30:15\] Before running 'apply\_patch'  
+1: \[2025-09-22 10:45:02\] Before running 'write\_file'
+
+You can then do \> /restore 0 to revert all file changes (and even the conversation context) back to how it was at that checkpoint. In this way, you can “undo” a mistaken code refactor or any other changes Gemini [made](https://medium.com/@ferreradaniel/gemini-cli-free-ai-tool-upgrade-5-new-features-you-need-right-now-04cfefac5e93#:~:text=1,point%20and%20roll%20back%20instantly).
+
+**What gets restored:** The checkpoint captures the state of your working directory (all files that Gemini CLI is allowed to modify) and the workspace files (conversation state may also be rolled back depending on how the checkpoint was captured). When you restore, it overwrites files to the old version and resets the conversation memory to that snapshot. It’s like time-traveling the AI agent back to before it made the wrong turn. Note that it won’t undo external side effects (for example, if the AI ran a database migration, it can’t undo that), but anything in the file system and chat context is fair game.
+
+**Best practices:** It’s a good idea to keep checkpointing on for non-trivial tasks. The overhead is small, and it provides peace of mind. If you find you don’t need a checkpoint (everything went well), you can always clear it or just let the next one overwrite it. The development team recommends using checkpointing especially before multi-step code [edits](https://medium.com/@ferreradaniel/gemini-cli-free-ai-tool-upgrade-5-new-features-you-need-right-now-04cfefac5e93#:~:text=Tips%20to%20avoid%20messy%20rollbacks). For mission-critical projects, though, you should still use a proper version control (git) as your primary safety [net](https://medium.com/@ferreradaniel/gemini-cli-free-ai-tool-upgrade-5-new-features-you-need-right-now-04cfefac5e93#:~:text=No,VS%20Code%20is%20already%20free) – consider checkpoints as a convenience for quick undo rather than a full VCS.
+
+In essence, **/restore** lets you use Gemini CLI with confidence. You can let the AI attempt bold changes, knowing you have an *“OH NO” button* to rewind if needed.
+
