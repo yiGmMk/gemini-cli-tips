@@ -140,7 +140,7 @@ Gemini CLI will recognize /test:gen and substitute the {{args}} in your prompt t
 
 This mechanism is extremely powerful - effectively, you can script the AI with natural language. The community has created numerous useful custom commands. For instance, Google's DevRel team shared a set of *10 practical workflow commands* (via an open-source repo) demonstrating how you can script common flows like creating API docs, cleaning data, or setting up boilerplate [code](https://cloud.google.com/blog/topics/developers-practitioners/agent-factory-recap-deep-dive-into-gemini-cli-with-taylor-mullen#:~:text=,to%20generate%20a%20better%20output). By defining a custom command, you package a complex prompt (or series of prompts) into a reusable shortcut.
 
-**Pro Tip:** Custom commands can also be used to enforce formatting or apply a "persona" to the AI for certain tasks. For example, you might have a /review:security command that always prefaces the prompt with "You are a security auditor…" to review code for vulnerabilities. This approach ensures consistency in how the AI responds to specific categories of tasks.
+**Pro Tip:** Custom commands can also be used to enforce formatting or apply a "persona" to the AI for certain tasks. For example, you might have a /review:security command that always prefaces the prompt with "You are a security auditor..." to review code for vulnerabilities. This approach ensures consistency in how the AI responds to specific categories of tasks.
 
 To share commands with your team, you can commit the TOML files in your project's repo (under .gemini/commands directory). Team members who have Gemini CLI will automatically pick up those commands when working in the project. This is a great way to **standardize AI-assisted workflows** across a team.
 
@@ -233,9 +233,9 @@ Alternatively, you can make it the default by adding to your config ("checkpoint
 
 If you then realize an AI-made edit is problematic, you have two options:
 
-* Run `*restore list*` (or just `/restore` with no arguments) to see a list of recent checkpoints with timestamps and descriptions.
+* Run `/restore list` (or just `/restore` with no arguments) to see a list of recent checkpoints with timestamps and descriptions.
 
-* Run `*restore <id>*` to rollback to a specific checkpoint. If you omit the id and there's only one pending checkpoint, it will restore that by [default](https://medium.com/@ferreradaniel/gemini-cli-free-ai-tool-upgrade-5-new-features-you-need-right-now-04cfefac5e93#:~:text=Step).
+* Run `/restore <id>` to rollback to a specific checkpoint. If you omit the id and there's only one pending checkpoint, it will restore that by [default](https://medium.com/@ferreradaniel/gemini-cli-free-ai-tool-upgrade-5-new-features-you-need-right-now-04cfefac5e93#:~:text=Step).
 
 For example:
 
@@ -362,7 +362,7 @@ In summary, **don't restrict Gemini to what it comes with**. Treat it as a junio
 
 **Quick use-case:** You can run Gemini CLI outside of a code project to help with general system tasks - think of it as an intelligent assistant for your OS. For example, if your shell is misbehaving, you could open Gemini in your home directory and ask: "Fix my .bashrc file, it has an error." Gemini can then open and edit your config file for you.
 
-This tip highlights that **Gemini CLI isn't just for coding projects - it's your AI helper for your whole development environment**. Many users (especially Googlers) have used Gemini to customize their dev setup or fix issues on their machine:
+This tip highlights that **Gemini CLI isn't just for coding projects - it's your AI helper for your whole development environment**. Many users have used Gemini to customize their dev setup or fix issues on their machine:
 
 * **Editing dotfiles:** You can load your shell configuration (.bashrc or .zshrc) by referencing it (@\~/.bashrc) and then ask Gemini CLI to optimize or troubleshoot it. For instance, "My PATH isn't picking up Go binaries, can you edit my .bashrc to fix that?" The AI can insert the correct export line. It will show you the diff for confirmation before saving changes.
 
@@ -402,7 +402,7 @@ Many advanced users toggle YOLO on and off frequently - turning it on when doing
 
 In summary, **YOLO mode eliminates friction at the cost of oversight**. It's a pro feature to use sparingly and wisely. It truly demonstrates trust in the AI (or recklessness\!). If you're new to Gemini CLI, you should probably avoid YOLO until you clearly understand the patterns of what it tends to do. If you do use it, double down on having version control or backups - just in case.
 
-*(If it's any consolation, you're not alone - many in the community joke about "I YOLO'ed and Gemini did something crazy." So use it, but… well, you only live once.)*
+*(If it's any consolation, you're not alone - many in the community joke about "I YOLO'ed and Gemini did something crazy." So use it, but... well, you only live once.)*
 
 ## Tip 11: Headless & Scripting Mode (Run Gemini CLI in the Background)
 
