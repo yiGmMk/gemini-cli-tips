@@ -794,3 +794,28 @@ Gemini CLI 的强大功能之一是它与 Visual Studio Code 的 **IDE 集成**�
 
 **提示：** 连接后，你可以使用 VS Code 的命令面板来控制 Gemini CLI 而无需离开编辑器。例如，按 **Ctrl+Shift+P**（Mac 上为 Cmd+Shift+P）并尝试像 **"Gemini CLI: Run"**（在终端中启动新的 CLI 会话）、**"Gemini CLI: Accept Diff"**（批准并应用打开的差异）或 **"Gemini CLI: Close Diff Editor"**（拒绝更改）等命令。这些快捷键可以进一步简化你的工作流程。而且记住，你不必总是手动启动 CLI——如果你启用了集成，Gemini CLI 本质上就成为了 VS Code 内部的 AI 协同开发者，观察上下文并在你处理代码时随时准备提供帮助。
 
+
+## 技巧 25：使用 `Gemini CLI GitHub Action` 自动化仓库任务
+
+**快速应用场景：** 让 Gemini 在 GitHub 上发挥作用 - 使用 **Gemini CLI GitHub Action** 来自动分类新 issue 和审查仓库中的拉取请求，就像一个 AI 团队成员一样处理日常开发[任务](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:text=1,write%20tests%20for%20this)。
+
+
+Gemini CLI 不仅仅适用于交互式终端会话；它还可以通过 GitHub Actions 在 CI/CD 流水线中运行。Google 提供了一个现成的 **Gemini CLI GitHub Action**（目前处于测试阶段），可以集成到您仓库的[工作流](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:text=It%E2%80%99s%20now%20in%20beta%2C%20available,cli)中。这实际上是在 GitHub 上的项目中部署了一个 AI 代理。它在后台运行，由仓库[事件](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:text=Triggered%20by%20events%20like%20new,do%2C%20and%20gets%20it%20done)触发。
+
+例如，当有人提交一个新的 **issue** 时，Gemini Action 会自动分析 issue 描述，应用相关标签，甚至确定其优先级或建议可能的重复项（这就是"智能 issue 分类"[工作流](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:text=1,attention%20on%20what%20matters%20most)）。当开启 **pull request** 时，Action 会启动并提供 **AI 代码审查** - 它会在 PR 上评论，提供关于代码质量、潜在错误或风格[改进](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:text=attention%20on%20what%20matters%20most,more%20complex%20tasks%20and%20decisions)的见解。这让维护者在任何人工查看之前就能获得对 PR 的即时反馈。
+
+或许最酷的功能是 **on-demand collaboration(按需协作)**：团队成员可以在 issue 或 PR 评论中提及 `@gemini-cli` 并给出指令，比如"`@gemini-cli` 请为此编写单元测试"。Action 会接收到这个信息，Gemini CLI 会尝试完成请求（例如，通过添加包含新测试的提交）。这就像在您的仓库中有一个 AI 助手，随时准备在需要时处理杂务。
+
+设置 Gemini CLI GitHub Action 非常简单。首先，确保您在本地安装了 **0.1.18 或更高版本**的 Gemini CLI（这确保了与 [Action](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:text=Gemini%20CLI%20GitHub%20Actions%20is,for%20individual%20users%20available%20soon)的兼容性）。然后，在 Gemini CLI 中运行特殊命令：[`/setup-github`](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:textTo%20get%20started%2C%20download%20Gemini,cli)。这个命令会在您的仓库中生成必要的工作流文件（如果需要，它会引导您完成身份验证）。具体来说，它会在 `.github/workflows/` 目录下添加 YAML 工作流文件（用于 issue 分类、PR 审查等）。
+
+您需要将 Gemini API 密钥添加到仓库的机密信息中（作为 `GEMINI_API_KEY`），这样 Action 就可以使用 Gemini [API](https://github.com/google-github-actions/run-gemini-cli#:~:text=Store%20your%20API%20key%20as,in%20your%20repository)。一旦完成并提交了工作流，GitHub Action 就会启动 - 从那一刻起，Gemini CLI 将根据这些工作流自主响应新的 issue 和 PR。
+
+
+由于这个 Action 本质上是以自动化方式运行 Gemini CLI，您可以像自定义 CLI 一样自定义它。默认设置包含三个工作流（issue 分类、PR 审查和通用的提及触发助手），这些工作流是**完全开源且可[编辑的](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:text=Think%20of%20these%20initial%20workflows,into%20Gemini%20CLI%20GitHub%20Actions)**。您可以调整 YAML 来修改 AI 的行为，甚至添加新的工作流。
+
+例如，您可以创建一个夜间工作流，使用 Gemini CLI 扫描仓库中的过期依赖项，或基于最近的代码更改更新 README - 可能性是无穷的。这里的关键好处是将繁琐或耗时的任务交给 AI 代理处理，让人类开发者可以专注于更困难的问题。而且由于它在 GitHub 的基础设施上运行，不需要您的干预 - 它真正是一个"设置即忘记"的 AI 助手。
+
+
+**提示：** 关注 GitHub Actions 日志中 Action 的输出以保持透明度。Gemini CLI Action 日志会显示它运行了什么提示以及做出了或建议了什么更改。这既能建立信任，也能帮助您优化其行为。此外，团队还在 Action 中内置了企业级安全保障 - 例如，您可以要求 AI 在工作流中尝试运行的所有 shell 命令都必须经过您的[允许列表](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:text=in%20your%20environment%2C%20drastically%20reducing,your%20preferred%20observability%20platform%2C%20like)批准。所以即使在严肃的项目中也不要犹豫使用它。
+
+如果您使用 Gemini CLI 想出了一个很酷的自定义工作流，考虑将其贡献回社区 - 项目欢迎在他们的仓库中提出新想法！
