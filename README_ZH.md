@@ -819,3 +819,30 @@ Gemini CLI 不仅仅适用于交互式终端会话；它还可以通过 GitHub A
 **提示：** 关注 GitHub Actions 日志中 Action 的输出以保持透明度。Gemini CLI Action 日志会显示它运行了什么提示以及做出了或建议了什么更改。这既能建立信任，也能帮助您优化其行为。此外，团队还在 Action 中内置了企业级安全保障 - 例如，您可以要求 AI 在工作流中尝试运行的所有 shell 命令都必须经过您的[允许列表](https://blog.google/technology/developers/introducing-gemini-cli-github-actions/#:~:text=in%20your%20environment%2C%20drastically%20reducing,your%20preferred%20observability%20platform%2C%20like)批准。所以即使在严肃的项目中也不要犹豫使用它。
 
 如果您使用 Gemini CLI 想出了一个很酷的自定义工作流，考虑将其贡献回社区 - 项目欢迎在他们的仓库中提出新想法！
+
+
+## 技巧 26：启用Telemetry以获得指标和可观测性
+
+**快速应用场景：** 通过启用内置的 **OpenTelemetry** 仪表化来深入了解 Gemini CLI 的使用情况和性能表现 - 监控 AI 会话的指标、日志和追踪，分析使用模式或排除[问题](https://google-gemini.github.io/gemini-cli/docs/cli/telemetry.html#:~:text:,across%20teams%2C%20track%20costs%2C%20ensure)。
+
+对于喜欢测量和优化的开发者来说，Gemini CLI 提供了一个可观测性功能，可以揭示内部发生的情况。通过利用 **OpenTelemetry (OTEL)**，Gemini CLI 可以上报关于您[会话](https://google-gemini.github.io/gemini-cli/docs/cli/telemetry.html#:~:text:Built%20on%20OpenTelemetry%20%E2%80%94%20the,Gemini%20CLI%E2%80%99s%20observability%20system%20provides)的结构化遥测数据。这包括指标（如使用的令牌数量、响应延迟）、所采取操作的日志，甚至工具调用的追踪。
+
+启用遥测后，您可以回答诸如：*我最常使用哪个自定义命令？本周 AI 在这个项目中编辑文件的次数是多少？当我要求 CLI 运行测试时的平均响应时间是多少？*这类数据对于理解使用模式和[性能](https://google-gemini.github.io/gemini-cli/docs/cli/telemetry.html#:~:text:,across%20teams%2C%20track%20costs%2C%20ensure)至关重要。团队可以用它来查看开发者如何与 AI 助手交互，以及可能存在的瓶颈在哪里。
+
+默认情况下，遥测是**关闭**的（Gemini 尊重隐私和性能）。您可以通过在 `settings.json` 中设置 `"telemetry.enabled": true` 或使用标志 [`--telemetry`](https://google-gemini.github.io/gemini-cli/docs/cli/telemetry.html#:~:text:Setting%20Environment%20Variable%20CLI%20Flag,grpc) 启动 Gemini CLI 来选择启用。此外，您可以选择遥测数据的**目标**：可以在**本地**记录或发送到像 Google Cloud 这样的后端。
+
+为了快速开始，您可以设置 `"telemetry.target": "local"` - 这样，Gemini 会简单地将遥测数据写入本地文件（默认情况下）或您通过 `["outfile"](https://google-gemini.github.io/gemini-cli/docs/cli/telemetry.html#:~:text:disable%20telemetry%20,file%20path)` 指定的自定义路径。本地遥测包括您可以解析或输入到工具中的 JSON 日志。
+
+为了更强大的监控，设置 `"target": "gcp"`（Google Cloud）或甚至与其他 OpenTelemetry 兼容的系统（如 Jaeger 或 [Datadog](https://google-gemini.github.io/gemini-cli/docs/cli/telemetry.html#:~:text:,between%20backends%20without%20changing%20your)）集成。事实上，Gemini CLI 的 OTEL 支持是厂商中立的 - 您可以将数据导出到您偏好的几乎任何可观测性堆栈（Google Cloud Operations、Prometheus、[等等](https://google-gemini.github.io/gemini-cli/docs/cli/telemetry.html#:~:text:,between%20backends%20without%20changing%20your)）。
+
+Google 为 Cloud 提供了简化的路径：如果您指向 GCP，CLI 可以直接将数据发送到您项目中的 Cloud Logging 和 Cloud Monitoring，在那里您可以使用通常的仪表板和警报[工具](https://google-gemini.github.io/gemini-cli/docs/cli/telemetry.html#:~:text:2,explorer%20%2A%20Traces%3A%20https%3A%2F%2Fconsole.cloud.google.com%2Ftraces%2Flist)。
+
+
+您能获得什么样的洞察？遥测捕获诸如工具执行、错误和重要里程碑等事件。它还记录指标，如提示处理时间和每个[提示](https://medium.com/google-cloud/gemini-cli-tutorial-series-part-13-gemini-cli-observability-c410806bc112#:~:text:,integrate%20with%20existing%20monitoring%20infrastructure)的令牌计数。
+
+对于使用分析，您可以聚合团队中每个斜杠命令的使用次数，或代码生成被调用的频率。对于性能监控，您可以跟踪响应是否变慢，这可能表明达到 API 速率限制或模型更改。对于调试，您可以看到工具抛出的错误或异常（例如，`run_shell_command` 失败）随上下文一起记录。
+
+如果将这些数据发送到像 Google Cloud Monitoring 这样的平台，所有这些数据都可以可视化 - 例如，您可以创建"每天使用的令牌数"或"工具 X 的错误率"的仪表板。它本质上为您提供了窥视 AI "大脑"和您使用情况的窗口，这在企业环境中特别有帮助，以确保一切运行[顺畅](https://medium.com/google-cloud/gemini-cli-tutorial-series-part-13-gemini-cli-observability-c410806bc112#:~:text:resource%20utilization%20%2A%20%20Real,integrate%20with%20existing%20monitoring%20infrastructure)。启用遥测确实会带来一些开销（额外的数据处理），所以个人使用时可能不会一直保持开启状态。然而，它对于调试会话或间歇性健康检查非常有用。一种方法是在 CI 服务器或团队的共享环境中启用它来收集统计信息，而在本地则保持关闭状态，除非需要。请记住，您可以随时动态切换：更新设置，如果需要可以使用 `/memory refresh` 重新加载，或使用 `--telemetry` 标志重启 Gemini CLI。此外，所有遥测都在您的控制之下 - 它尊重您为端点和凭据设置的环境变量，因此数据只会到达您想要的地方。这个功能将 Gemini CLI 从黑盒变成了天文台，照亮了 AI 代理如何与您的世界互动，这样您就可以持续改进这种互动。
+
+
+**提示：** 如果您只是想快速查看当前会话的统计信息（而不需要完整的遥测），使用 `/stats` 命令。它会在 [CLI](https://www.howtouselinux.com/post/the-complete-google-gemini-cli-cheat-sheet-and-guide#:~:text:Command%20Description%20,tag%3E%60Save%20the%20current%20conversation) 中直接输出令牌使用量和会话长度等指标。这是查看即时数据的轻量级方法。但对于长期或多会话分析，遥测是正确的选择。如果您将遥测发送到云项目，考虑设置仪表板或警报（例如，如果错误率激增或令牌使用量达到阈值则警报） - 这可以主动捕获 Gemini CLI 在您团队中使用时出现的问题。
